@@ -50,108 +50,117 @@
 
     events: function () {
       var self = this;
+      $(document).ready(function(){
+        $(this.scope)
+          .on('click.fndtn.forms', 'form.custom span.custom.checkbox', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            self.toggle_checkbox($(this));
+          })
+          .on('click.fndtn.forms', 'form.custom span.custom.radio', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            self.toggle_radio($(this));
+          })
+          .on('change.fndtn.forms', 'form.custom select', function (e, force_refresh) {
+            if ($(this).is('[data-customforms="disabled"]')) return;
+            self.refresh_custom_select($(this), force_refresh);
+          })
+          .on('click.fndtn.forms', 'form.custom label', function (e) {
+            if ($(e.target).is('label')) {
+              var $associatedElement = $('#' + self.escape($(this).attr('for'))).not('[data-customforms="disabled"]'),
+                $customCheckbox,
+                $customRadio;
 
-      $(this.scope)
-        .on('click.fndtn.forms', 'form.custom span.custom.checkbox', function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          self.toggle_checkbox($(this));
-        })
-        .on('click.fndtn.forms', 'form.custom span.custom.radio', function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          self.toggle_radio($(this));
-        })
-        .on('change.fndtn.forms', 'form.custom select', function (e, force_refresh) {
-          if ($(this).is('[data-customforms="disabled"]')) return;
-          self.refresh_custom_select($(this), force_refresh);
-        })
-        .on('click.fndtn.forms', 'form.custom label', function (e) {
-          if ($(e.target).is('label')) {
-            var $associatedElement = $('#' + self.escape($(this).attr('for'))).not('[data-customforms="disabled"]'),
-              $customCheckbox,
-              $customRadio;
-
-            if ($associatedElement.length !== 0) {
-              if ($associatedElement.attr('type') === 'checkbox') {
-                e.preventDefault();
-                $customCheckbox = $(this).find('span.custom.checkbox');
-                //the checkbox might be outside after the label or inside of another element
-                if ($customCheckbox.length === 0) {
-                  $customCheckbox = $associatedElement.add(this).siblings('span.custom.checkbox').first();
+              if ($associatedElement.length !== 0) {
+                if ($associatedElement.attr('type') === 'checkbox') {
+                  e.preventDefault();
+                  $customCheckbox = $(this).find('span.custom.checkbox');
+                  //the checkbox might be outside after the label or inside of another element
+                  if ($customCheckbox.length === 0) {
+                    $customCheckbox = $associatedElement.add(this).siblings('span.custom.checkbox').first();
+                  }
+                  self.toggle_checkbox($customCheckbox);
+                } else if ($associatedElement.attr('type') === 'radio') {
+                  e.preventDefault();
+                  $customRadio = $(this).find('span.custom.radio');
+                  //the radio might be outside after the label or inside of another element
+                  if ($customRadio.length === 0) {
+                    $customRadio = $associatedElement.add(this).siblings('span.custom.radio').first();
+                  }
+                  self.toggle_radio($customRadio);
                 }
-                self.toggle_checkbox($customCheckbox);
-              } else if ($associatedElement.attr('type') === 'radio') {
-                e.preventDefault();
-                $customRadio = $(this).find('span.custom.radio');
-                //the radio might be outside after the label or inside of another element
-                if ($customRadio.length === 0) {
-                  $customRadio = $associatedElement.add(this).siblings('span.custom.radio').first();
-                }
-                self.toggle_radio($customRadio);
               }
             }
-          }
-        })
-        .on('mousedown.fndtn.forms', 'form.custom div.custom.dropdown', function () {
-          return false;
-        })
-        .on('click.fndtn.forms', 'form.custom div.custom.dropdown a.current, form.custom div.custom.dropdown a.selector', function (e) {
-          var $this = $(this),
-              $dropdown = $this.closest('div.custom.dropdown'),
-              $select = getFirstPrevSibling($dropdown, 'select');
-
-          // make sure other dropdowns close
-          if (!$dropdown.hasClass('open')) $(self.scope).trigger('click');
-
-          e.preventDefault();
-          if (false === $select.is(':disabled')) {
-            $dropdown.toggleClass('open');
-
-            if ($dropdown.hasClass('open')) {
-              $(self.scope).on('click.fndtn.forms.customdropdown', function () {
-                $dropdown.removeClass('open');
-                $(self.scope).off('.fndtn.forms.customdropdown');
-              });
-            } else {
-              $(self.scope).on('.fndtn.forms.customdropdown');
-            }
+          })
+          .on('mousedown.fndtn.forms', 'form.custom div.custom.dropdown', function () {
             return false;
-          }
-        })
-        .on('click.fndtn.forms touchend.fndtn.forms', 'form.custom div.custom.dropdown li', function (e) {
-          var $this = $(this),
-              $customDropdown = $this.closest('div.custom.dropdown'),
-              $select = getFirstPrevSibling($customDropdown, 'select'),
-              selectedIndex = 0;
+          })
+          .on('click.fndtn.forms', 'form.custom div.custom.dropdown a.current, form.custom div.custom.dropdown a.selector', function (e) {
+            var $this = $(this),
+                $dropdown = $this.closest('div.custom.dropdown'),
+                $select = getFirstPrevSibling($dropdown, 'select');
 
-          e.preventDefault();
-          e.stopPropagation();
+            // make sure other dropdowns close
+            if (!$dropdown.hasClass('open')) $(self.scope).trigger('click');
 
-          if (!$(this).hasClass('disabled')) {
-            $('div.dropdown').not($customDropdown).removeClass('open');
+            e.preventDefault();
+            if (false === $select.is(':disabled')) {
+              $dropdown.toggleClass('open');
 
-            var $oldThis = $this.closest('ul')
-              .find('li.selected');
-            $oldThis.removeClass('selected');
-
-            $this.addClass('selected');
-
-            $customDropdown.removeClass('open')
-              .find('a.current')
-              .text($this.text());
-
-            $this.closest('ul').find('li').each(function (index) {
-              if ($this[0] === this) {
-                selectedIndex = index;
+              if ($dropdown.hasClass('open')) {
+                $(self.scope).on('click.fndtn.forms.customdropdown', function () {
+                  $dropdown.removeClass('open');
+                  $(self.scope).off('.fndtn.forms.customdropdown');
+                });
+              } else {
+                $(self.scope).on('.fndtn.forms.customdropdown');
               }
-            });
-            $select[0].selectedIndex = selectedIndex;
+              return false;
+            }
+          }).end().find('form.custom div.custom.dropdown li')
+          .on('click.fndtn.forms touchend.fndtn.forms', function (e) {
+            var $this = $(this),
+                $customDropdown = $this.closest('div.custom.dropdown'),
+                $select = getFirstPrevSibling($customDropdown, 'select'),
+                selectedIndex = 0;
 
-            //store the old value in data
-            $select.data('prevalue', $oldThis.html());
-            $select.trigger('change');
-          }
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (!$(this).hasClass('disabled')) {
+              $('div.dropdown').not($customDropdown).removeClass('open');
+
+              var $oldThis = $this.closest('ul')
+                .find('li.selected');
+              $oldThis.removeClass('selected');
+
+              $this.addClass('selected');
+
+              $customDropdown.removeClass('open')
+                .find('a.current')
+                .text($this.text());
+
+              $this.closest('ul').find('li').each(function (index) {
+                if ($this[0] === this) {
+                  selectedIndex = index;
+                }
+              });
+              $select[0].selectedIndex = selectedIndex;
+
+              //store the old value in data
+              $select.data('prevalue', $oldThis.html());
+              
+              // Kick off full DOM change event
+              if (typeof (document.createEvent) != 'undefined') {
+                var event = document.createEvent('HTMLEvents');
+                event.initEvent('change', true, true);
+                $select[0].dispatchEvent(event);
+              } else {
+                $select[0].fireEvent('onchange'); // for IE
+              }
+            }
+        });
       });
 
       $(window).on('keydown', function (e) {

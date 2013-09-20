@@ -4,7 +4,7 @@
   'use strict';
 
   Foundation.libs.tooltips = {
-    name: 'tooltips',
+    name : 'tooltips',
 
     version : '4.2.2',
 
@@ -35,33 +35,36 @@
 
       if (typeof method !== 'string') {
         if (Modernizr.touch) {
-          $(this.scope)
-            .on('click.fndtn.tooltip touchstart.fndtn.tooltip touchend.fndtn.tooltip', 
-              '[data-tooltip]', function (e) {
-              var settings = $.extend({}, self.settings, self.data_options($(this)));
-              if (!settings['disable-for-touch']) {
+          $(document).ready(function(){
+            $(this.scope).find("[data-tooltip]")
+              .on('click.fndtn.tooltip touchstart.fndtn.tooltip touchend.fndtn.tooltip', function (e) {
+                var settings = $.extend({}, self.settings, self.data_options($(this)));
+                if (!settings['disable-for-touch']) {
+                  e.preventDefault();
+                  $(settings.tooltipClass).hide();
+                  self.showOrCreateTip($(this));
+                }
+              }).end().find(this.settings.tooltipClass)
+              .on('click.fndtn.tooltip touchstart.fndtn.tooltip touchend.fndtn.tooltip', function (e) {
                 e.preventDefault();
-                $(settings.tooltipClass).hide();
-                self.showOrCreateTip($(this));
-              }
-            })
-            .on('click.fndtn.tooltip touchstart.fndtn.tooltip touchend.fndtn.tooltip', 
-              this.settings.tooltipClass, function (e) {
-              e.preventDefault();
-              $(this).fadeOut(150);
-            });
-        } else {
-          $(this.scope)
-            .on('mouseenter.fndtn.tooltip mouseleave.fndtn.tooltip', 
-              '[data-tooltip]', function (e) {
-              var $this = $(this);
+                $(this).fadeOut(150);
+              });
+          })
 
-              if (/enter|over/i.test(e.type)) {
-                self.showOrCreateTip($this);
-              } else if (e.type === 'mouseout' || e.type === 'mouseleave') {
-                self.hide($this);
-              }
-            });
+        } else {
+          $(document).ready(function(){
+            $(this.scope)
+              .on('mouseenter.fndtn.tooltip mouseleave.fndtn.tooltip', 
+                '[data-tooltip]', function (e) {
+                var $this = $(this);
+
+                if (/enter|over/i.test(e.type)) {
+                  self.showOrCreateTip($this);
+                } else if (e.type === 'mouseout' || e.type === 'mouseleave') {
+                  self.hide($this);
+                }
+              });
+          });
         }
 
         // $(this.scope).data('fndtn-tooltips', true);
